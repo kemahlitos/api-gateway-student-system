@@ -46,13 +46,6 @@ Additional components:
 
 ---
 
-## 📂 Project Files
-- **Report**: [`apiGateawayProject.pdf`](./report/apiGateawayProject.pdf)  
-- **Docker Compose & Scripts**: in `/src/`  
-- **Monitoring Scripts**: in `/monitoring/`  
-
----
-
 ## 👤 Author
 - **Yusuf Kemahlı**  
 - Final project for *Cloud Computing Technologies* course, Università degli Studi di Milano (Spring 2024–2025)  
