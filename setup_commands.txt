@@ -1,0 +1,99 @@
+0'Dan başlatma
+
+cd Desktop/24-25SPRERASMUS/CLOUD/api_gateaway_project
+docker compose down -v --remove-orphans
+docker image prune -af
+
+docker compose up --build --force-recreate -d
+
+./setup_kong.sh
+
+
+Postman tests
+
+log için 
+
+chmod +x log_monitor.sh
+docker exec -it api_gateaway_project-kong-1 bash /usr/local/bin/log_monitor.sh
+
+#docker exec -it api_gateaway_project-kong-1 bash
+#./log_monitor.sh
+
+prometheus metrics summary için
+chmod +x prometheus_monitor.sh
+./prometheus_monitor.sh
+watch -n 5 ./prometheus_monitor.sh  (better)
+
+
+Fault Tolerance Tests
+docker stop api_gateaway_project-student-service-2-1
+
+sonra testler at postmandan --->Instance 1 gözlemle
+
+docker start api_gateaway_project-student-service-2-1 (tekrar başlat, düzgün sistem çalışmaya devam)
+
+
+
+DECK-->configürasyonları yedeklemek ve sync etmek için
+deck gateway dump --output-file kong.yaml (yedekle)
+deck gateway reset (temizle)
+deck gateway sync kong.yaml (yeniden yükle)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+version1:
+tail -f /tmp/kong_logs.log | grep -o '"uri":"[^"]*"\|"status":[0-9]*'
+
+version2:(better)
+tail -f /tmp/kong_logs.log | \
+while read line; do
+  method=$(echo "$line" | grep -o '"method":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+  uri=$(echo "$line" | grep -o '"uri":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+  status=$(echo "$line" | grep -o '"status":[0-9]*' | cut -d':' -f2)
+  ip=$(echo "$line" | grep -o '"client_ip":"[^"]*"' | cut -d':' -f2 | tr -d '"')
+  latency=$(echo "$line" | grep -o '"proxy":[0-9]*' | grep -o '[0-9]*')
+  printf "[%-5s] %-30s | status: %-3s | ip: %-15s | latency: %sms\n" "$method" "$uri" "$status" "$ip" "$latency"
+done
+
+

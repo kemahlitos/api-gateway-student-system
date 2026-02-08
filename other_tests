@@ -1,0 +1,102 @@
+şimdi doğru mu anlıyorum: önceden sistemimiz şöyleydi, biz admin ve password değişkeni tanımlıyorduk bunlar authenticationa gidip geçerliyse bi token üretiyorlardı bu tokenı da data-service'e geçince eğer superkey ile uyuşuyorsa token ve gerekli teslerden geçerse tamam al bu senin verin diyordu. Ama şimdi bu işler kong'da olucak.Önce jwt plugini aktif ettik ne işe yarıyor anlamadım? Sonra Bunun için bi consumer grubu grubu oluşturduk sadece username'i var(passworda gerek kalmadı mı?), Oluşturduğumuz consumerlardan admin kullanıcısı için jwt çağırınca bize key ve secret veriyor(önceki sistemden farklı), sonra bi zde bu key ve secreti auth-service entegre ediyoruz?
+
+
+ChatGPT:
+Evet! 👏 Çok ama çok güzel özetledin. Ufak birkaç detayı netleştirip her şeyi tam oturtalım.
+
+✅ DOĞRU ANLADIĞIN KISIMLAR:
+🧱 Önceki sistem (Kong yokken):
+auth-service kendi içinde username + password kontrol ederdi
+
+Doğruysa SECRET_KEY = "supersecretkey" ile JWT üretirdi
+
+data-service de bu token’ı aynı SECRET_KEY ile doğrulardı
+
+🔁 Yeni sistemde (Kong geldiğinde):
+Artık Kong her şeyin ortasında, o karar veriyor:
+
+Token doğru mu?
+
+Kimlik kontrolü tamam mı?
+
+Servise erişim verilsin mi?
+
+🔐 Şimdi tek tek bakalım:
+✅ 1. JWT Plugin ne işe yarıyor?
+Kong'a şunu söylüyor:
+
+“Bu servise gelen isteklerde JWT kontrolü yap. Token varsa ve doğruysa geç, yoksa reddet.”
+
+Yani bu plugin → Authorization: Bearer <token> başlığını Kong’un kontrol etmesini sağlar.
+Kendi içinde:
+
+Token var mı?
+
+Token süresi geçmemiş mi?
+
+Hangi kullanıcıya ait?
+
+O kullanıcı Kong’da kayıtlı mı?
+
+...bunlara bakar.
+
+✅ 2. Consumer ne demek?
+Kong içinde API’yi kullanan “kullanıcı” tanımıdır
+
+username=admin gibi bir kayıt gireriz
+
+Parola gerekmez çünkü bu kullanıcı JWT token ile doğrulanır
+
+Yani: token = kimlik
+
+✅ 3. JWT oluştururken key ve secret nereden geliyor?
+Consumer oluşturduktan sonra şunu dedik:
+
+bash
+Kopyala
+Düzenle
+POST /consumers/admin/jwt
+Bu, Kong’a şunu der:
+
+“admin isimli kullanıcıya bir token üretme kimliği ver”
+Kong sana:
+
+key → JWT'de kimin adına oluşturulduğunu gösteren "iss"
+
+secret → Token'ı imzalarken kullanılacak anahtar
+
+🔁 Fark ne?
+Kriter	Eski Sistem	Kong ile Sistem
+Token kim üretir?	auth-service	hâlâ auth-service
+Token nasıl doğrulanır?	SECRET_KEY ile (hardcoded)	Kong'un bildiği secret ile
+Token'ı kim doğrular?	data-service (kendi içinde)	Kong (plugin sayesinde)
+Kullanıcı yönetimi	app.py içinde sabit	Kong içinde consumer olarak kayıtlı
+
+✅ Ne yapacağız şimdi?
+Kong’un sana verdiği secret (ve key) değerlerini not edeceğiz
+
+auth-service/app.py içinde:
+
+python
+Kopyala
+Düzenle
+SECRET_KEY = "<KONG_SECRET>"
+olarak değiştireceğiz
+3. Token oluştururken iss=key olarak JWT payload'a ekleyeceğiz (Kong bunu arar)
+
+İstersen hemen bir örnek auth-service güncellemesi yapayım mı?
+Senin Kong’dan aldığın key ve secret’i birlikte entegre edelim.
+
+
+
+
+
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{setspace} % EKLENDİ
+\usepackage{graphicx}
+...
+\setstretch{1.1} % satır aralığı azaltıldı
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}  % paragraf boşluğu azaltıldı
